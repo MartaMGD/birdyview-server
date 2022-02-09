@@ -1,0 +1,35 @@
+{
+  "name": "birdyview-server",
+  "version": "1.0.0",
+  "description": "Server for birdyview-client",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MartaMGD/birdyview-server.git"
+  },
+  "keywords": [
+    "birdyview",
+    "project",
+    "server",
+    "mongoDB",
+    "express",
+    "mongoose"
+  ],
+  "author": "Marta Gonzalez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MartaMGD/birdyview-server/issues"
+  },
+  "homepage": "https://github.com/MartaMGD/birdyview-server#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.2",
+    "mongoose": "^6.2.1"
+  }
+}
