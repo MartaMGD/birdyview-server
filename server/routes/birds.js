@@ -34,19 +34,7 @@ router.post("/", (req, res) => {
         description: body.description
     })
 
-    bird.save((err, birdDB) => {
-        if (err) {
-            res.status(400).json({
-                ok: false,
-                err,
-            });
-        } else {
-            res.json({
-                ok: true,
-                user: birdDB,
-            });
-        }
-    });
+
 });
 
 module.exports = router;

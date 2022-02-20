@@ -1,18 +1,31 @@
 require("./config/config.js");
 
+// Imports
 const mongoose = require("mongoose");
 const express = require("express");
-const app = express();
-const birds = require("./routes/birds.js");
-const users = require("./routes/users.js");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+// App
+const app = express();
+
+// Routes
+const birds = require("./routes/birds.js");
+const users = require("./routes/users.js");
+const signup = require("./routes/signup.js");
+
+// Middleware and parsers
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/birds", birds);
 app.use("/users", users);
+app.use("/signup", signup);
 
+
+// Connection to DATABASE
 mongoose.connect("mongodb://localhost:27017/birdyview");
 
 const db = mongoose.connection;

@@ -31,9 +31,9 @@ router.get("/", (req, res) => {
 // MÉTODO POST
 router.post("/", (req, res) => {
     // AQUÍ ESTAMOS GUARDANDO EL CUERPO QUE SE ENVÍA
-    const { username, email, password, role } = req.body;
+    const { firstname, lastname, username, email, password, isAdmin } = req.body;
 
-    const user = new User({ name, lastname, username, email, password, role });
+    const user = new User({ firstname, lastname, username, email, password, isAdmin });
 
     user.save((error, userDB) => {
         if (error) {
@@ -54,10 +54,10 @@ router.post("/", (req, res) => {
 // SE ACCEDE POR PARAMS. ES IMPORTANTE CITARLO. 
 router.put("/:id", (req, res) => {
     const id = req.params.id;
-    const { name, lastname, username, email, password, role } = req.body;
+    const { firstname, lastname, username, email, password, isAdmin } = req.body;
     User.findByIdAndUpdate(
         id,
-        { name, lastname, username, email, password, role },
+        { firstname, lastname, username, email, password, isAdmin },
         {
             new: true,
             runValidators: true,
