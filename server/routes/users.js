@@ -1,11 +1,13 @@
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
 
-// CONVIERTE EL JSON EN OBJETO JAVASCRIPT DONDE LO NECESITE
+
+// JSON TO JAVASCRIPT PARSER
 router.use(express.json());
 const User = require("../models/user");
 
-// PETICIÓN GET
+// GET METHOD TO RECEIVE INFO
 router.get("/", (req, res) => {
     const from = req.query.from || 0;
     const limit = req.query.limit || 3;
@@ -28,30 +30,45 @@ router.get("/", (req, res) => {
         });
 });
 
-// MÉTODO POST
-router.post("/", (req, res) => {
-    // AQUÍ ESTAMOS GUARDANDO EL CUERPO QUE SE ENVÍA
+// POST METHOD TO REGISTER USER
+router.post("/", async (req, res) => {
     const { firstname, lastname, username, email, password, isAdmin } = req.body;
-
-    const user = new User({ firstname, lastname, username, email, password, isAdmin });
-
-    user.save((error, userDB) => {
-        if (error) {
-            res.status(400).json({
-                ok: false,
-                error
-            })
-        } else {
-            res.status(201).json({
-                ok: true,
-                user: userDB
-            });
-        }
-    });
+    try {
+        const user = await User.create({
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            username: req.body.username,
+            email: req.body.email,
+            password: req.body.password,
+            isAdmin: req.body,isAdmin,
+        })
+        res.json({status:'ok'})
+    } catch (err) {
+        res.json({status: 'error', error: 'Duplicate email'})
+    }
+    
 });
 
-// MÉTODO PUT
-// SE ACCEDE POR PARAMS. ES IMPORTANTE CITARLO. 
+// POST METHOD TO LOGIN USER
+router.post("/login", async (req,res) => {
+    const user = await User.findOne({
+        email: req.body.email,
+        password: req.body.password,
+    })
+
+    if (user) {
+        const token = jwt.sign({
+            username: req.body.username,
+            email: req.body.email,
+        }, 'secret123')
+
+        return res.json({status: 'ok', user: token})
+    } else {
+        res.json({status: 'error', user: false})
+    }
+})
+
+// PUT METHOD TO UPDATE
 router.put("/:id", (req, res) => {
     const id = req.params.id;
     const { firstname, lastname, username, email, password, isAdmin } = req.body;
@@ -79,7 +96,7 @@ router.put("/:id", (req, res) => {
     );
 });
 
-// MÉTODO DELETE
+//  DELETE METHOD
 router.delete("/:id", (req, res) => {
     const id = req.params.id;
 
