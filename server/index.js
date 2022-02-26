@@ -1,5 +1,3 @@
-require("./config/config.js");
-
 // Imports
 const mongoose = require("mongoose");
 const express = require("express");
@@ -7,12 +5,17 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+const dotenv = require("dotenv");
+dotenv.config();
+
 // App
 const app = express();
 
 // Routes
 const birds = require("./routes/birds.js");
 const users = require("./routes/users.js");
+const userRoute = require("./routes/user");
+const authRoute = require("./routes/auth");
 
 // Middleware and parsers
 app.use(cors());
@@ -21,14 +24,16 @@ app.use(cookieParser());
 
 app.use("/birds", birds);
 app.use("/users", users);
+app.use("/api/user", userRoute);
+app.use("/api/auth", authRoute);
 
 // Connection to DATABASE
-mongoose.connect("mongodb://localhost:27017/birdyview");
+mongoose.connect(process.env.MONGO_URL);
 
 const db = mongoose.connection;
-db.on("error", error => console.log("Conexión fallida", error));
-db.once("open", () => console.log("Conexión correcta."));
+db.on("error", error => console.log("Connection error", error));
+db.once("open", () => console.log("Connection successful."));
 
-app.listen(process.env.PORT, () => {
-    console.log(`Web server listening at port ${process.env.PORT}`);
+app.listen(5000, () => {
+    console.log(`Web server listening at port 5000.`);
 });
