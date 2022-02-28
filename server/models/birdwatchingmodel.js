@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-const BirdwatchingSchema = new mongoose.Schema(
+const birdwatchingSchema = new mongoose.Schema(
     {
         userId:
         {
             type: String,
-            required: true
+            required: false
         },
         birdname: 
         {
@@ -26,8 +26,16 @@ const BirdwatchingSchema = new mongoose.Schema(
         {
             type: String,
             required: true
-        }
+        },
+        completed: {
+            type: Boolean,
+            default: false,
+        },
+        active: {
+            type: Boolean,
+            default: true
+        },
     }
 )
 
-module.exports = mongoose.model("Birdwatching", BirdwatchingSchema);
+module.exports = mongoose.model("Birdwatching", birdwatchingSchema);
