@@ -29,7 +29,7 @@ router.get("/", (req, res) => {
 
 // POST METHOD TO REGISTER WATCHED BIRD
 router.post("/", async (req, res) => {
-    const { userId, birdname, location, date, hour} = req.body;
+    const { userId, birdname, location, date, hour } = req.body;
     try {
         const birdwatching = await Birdwatching.create({
             userId: req.body.userId,
@@ -46,54 +46,34 @@ router.post("/", async (req, res) => {
 });
 
 // PUT METHOD TO UPDATE WATCHED BIRD
-router.put("/:id", (req, res) => {
-    const id = req.params.id;
-    const { birdname, location, date, hour} = req.body;
-    Birdwatching.findByIdAndUpdate(
-        id,
-        { birdname, location, date, hour},
-        {
-            new: true,
-            runValidators: true,
-            context: "query" // Validations 
-        },
-        (error, birdwatchingDB) => {
-            if (error) {
-                res.status(400).json({
-                    ok: false,
-                    error
-                })
-            } else {
-                res.status(200).json({
-                    ok: true,
-                    birdwatching: birdwatchingDB
-                });
-            }
-        }
-    );
+router.put("/update", async (req, res) => {
+    const newName = req.body.newName
+    const newLocation = req.body.newLocation
+    const newDate = req.body.newDate
+    const newHour = req.body.newHour
+    const id = req.body.id;
+
+    try {
+        await Birdwatching.findById(id, (error, birdToUpdate) => {
+            birdToUpdate.birdname = newName
+            birdToUpdate.location = newLocation
+            birdToUpdate.date = newDate
+            birdToUpdate.hour = newHour
+            birdToUpdate.save();
+        });
+    } catch (err) {
+        console.log(err);
+    }
+
+    res.send("Actualizado")
 });
 
 //  DELETE METHOD
-router.delete("/:id", (req, res) => {
+router.delete("/delete/:id", (req, res) => {
     const id = req.params.id;
 
-    // Hard delete
-    Birdwatching.findByIdAndDelete(
-        id,
-        (error, birdwatchingDB) => {
-            if (error) {
-                res.status(400).json({
-                    ok: false,
-                    error
-                })
-            } else {
-                res.status(204).json({
-                    ok: true,
-                    birdwatching: birdwatchingDB
-                });
-            }
-        }
-    )
+    Birdwatching.findByIdAndRemove(id).exec()
+    res.send("Avistamiento eliminado.")
 });
 
 module.exports = router;
