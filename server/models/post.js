@@ -2,12 +2,17 @@ const mongoose = require("mongoose");
 
 const PostSchema = new mongoose.Schema(
     {
-        name:
+        author:
         {
             type: String,
             required: true
         },
         title: 
+        {
+            type: String,
+            required: true
+        },
+        extract:
         {
             type: String,
             required: true
@@ -20,7 +25,7 @@ const PostSchema = new mongoose.Schema(
         image:
         {
             type: String,
-            required: true
+            required: false
         }
     },
     {timestamps: true}

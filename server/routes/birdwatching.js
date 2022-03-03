@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT METHOD TO UPDATE WATCHED BIRD
-router.put("/update", async (req, res) => {
+router.put("/", async (req, res) => {
     const newName = req.body.newName
     const newLocation = req.body.newLocation
     const newDate = req.body.newDate

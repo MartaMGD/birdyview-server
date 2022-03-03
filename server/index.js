@@ -17,6 +17,7 @@ const users = require("./routes/users.js");
 const userRoute = require("./routes/user");
 const authRoute = require("./routes/auth");
 const birdwatchingRoute = require("./routes/birdwatching");
+const postRoute = require("./routes/posts");
 
 // Middleware and parsers
 app.use(cors());
@@ -28,6 +29,7 @@ app.use("/users", users);
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/birdwatching", birdwatchingRoute);
+app.use("/posts", postRoute);
 
 // Connection to DATABASE
 mongoose.connect(process.env.MONGO_URL);
