@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-
-router.use(express.json());
 const Posts = require("../models/post");
+const User = require("../models/usermodel");
+router.use(express.json());
+
 
 router.get("/", (req, res) => {
     Posts.find()
@@ -32,27 +33,47 @@ router.get("/:id", (req, res) => {
 });
 
 // Find post by id and UPDATE
-router.put("/update/:id", (req, res) => {
-    Posts.findById(req.params.id)
-        .then(post => {
-            post.author = req.body.author;
-            post.title = req.body.title;
-            post.extract = req.body.extract;
-            post.body = req.body.body;
-
-            post
-                .save()
-                .then(() => res.json("El artículo ha sido actualizado"))
-                .catch(err => res.status(400).json(`Error: ${err}`));
-        })
-        .catch(err => res.status(400).json(`Error: ${err}`));
-})
+router.put("/:id", async (req, res) => {
+    try {
+        const post = await Posts.findById(req.params.id);
+        if (post.username === req.body.username)
+            try {
+                const updatedPost = await Post.findByIdAndUpdate(
+                    req.params.id,
+                    {
+                        $set: req.body,
+                    },
+                    { new: true }
+                );
+                res.status(200).json(updatedPost)
+            } catch (err) {
+                res.status(500).json(err);
+            } else {
+            res.status(401).json("Solo puedes actualizar tu artículo");
+        }
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
 
 // Find post by id and DELETE
-router.delete('/:id', (req,res) => {
-    Posts.findByIdAndDelete(req.params.id)
-    .then(() => res.json("El artículo ha sido eliminado."))
-    .catch(err => res.status(400).json(`Error: ${err}`));
+router.delete('/:id', async (req, res) => {
+    if (req.body.userId === req.params.id) {
+        try {
+            const user = await User.findById(req.params.id);
+            try {
+                await Posts.deleteMany({ username: user.username });
+                await User.findByIdAndDelete(req.params.id);
+                res.status(200).json("Usuario eliminado");
+            } catch (err) {
+                res.status(500).json(err);
+            }
+        } catch (err) {
+            res.status(404).json("Usuario no encontrado")
+        }
+    } else {
+        res.status(401).json("Solo puedes eliminar tu cuenta.")
+    }
 })
 
 module.exports = router;

@@ -1,56 +1,53 @@
-const user = require("../models/usermodel");
-const { verifyToken, verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifyToken");
+const User = require("../models/usermodel");
+const Post = require("../models/post");
 const router = require("express").Router();
 
 // MODIFY/UPDATE USER
-router.put("/:id", verifyTokenAndAuthorization, async (req, res) => {
-    if (req.body.password) {
-        req.body.password = CryptoJS.AES.encrypt(
-            req.body.password,
-            process.env.PASS_SEC
-        ).toString();
-    }
-
-    try {
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-            $set: req.body
-        },
-            { new: true }
-        );
-        res.status(200).json(updatedUser);
-    } catch (err) {
-        res.status(500).json(err);
+router.put("/:id", async (req, res) => {
+    if (req.body.userId === req.params.id) {
+        if (req.body.password) {
+            const salt = await bcrypt.genSalt(10);
+            req.body.password = await bcrypt.hash(req.body.password, salt);
+        }
+        try {
+            const updatedUser = await User.findByIdAndUpdate(req.params.id, {
+                $set: req.body,
+            }, { new: true });
+            res.status(200).json(updatedUser);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    } else {
+        res.status(401).json("Solo puedes actualizar tu cuenta.");
     }
 });
 
 // TO DELETE
-router.delete("/:id", verifyTokenAndAuthorization, async (req, res) => {
-    try {
-        await User.findbyIdAndDelete(req.params.id)
-        res.status(200).json("Usuario eliminado.")
-    } catch (err) {
-        res.status(500).json(err)
-    }
-})
-
-// TO GET
-router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
-    try {
-       const user = await User.findById(req.params.id)
-       const {password, ...others} = user._doc;
-        res.status(200).json(others)
-    } catch (err) {
-        res.status(500).json(err);
+router.delete("/:id", async (req, res) => {
+    if (req.body.userId === req.params.id) {
+        try {
+            const user = await User.findById(req.params.id);
+            try {
+                await Post.deleteMany({username: user.username});
+                await User.findByIdAndDelete(req.params.id);
+                res.status(200).json("Usuario eliminado");
+            } catch (err) {
+                res.status(500).json(err);
+            }
+        } catch (err) {
+            res.status(404).json("Usuario no encontrado")
+        }
+    } else {
+        res.status(401).json("Solo puedes eliminar tu cuenta");
     }
 });
 
-// TO GET ALL USERS
-router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
-    const query = req.query.new;
+// TO GET
+router.get("/:id", async (req, res) => {
     try {
-       const users = query ? await User.find().sort({_id:-1}).limit(1)
-       : await User.find();
-        res.status(200).json(users);
+        const user = await User.findById(req.params.id)
+        const { password, ...others } = user._doc;
+        res.status(200).json(others);
     } catch (err) {
         res.status(500).json(err);
     }
