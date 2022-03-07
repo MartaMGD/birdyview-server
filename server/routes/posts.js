@@ -4,41 +4,47 @@ const Posts = require("../models/post");
 const User = require("../models/usermodel");
 router.use(express.json());
 
-
-router.get("/", (req, res) => {
-    Posts.find()
-        .then(post => res.json(post))
-        .catch(err => res.status(400).res.json(`Error: ${err}`));
+// TO GET ALL POSTS
+router.get("/", async (req, res) => {
+    const username = req.query.user;
+    try {
+        let posts;
+        if (username) {
+            posts = await Posts.find({ username });
+        } else {
+            posts = await Posts.find();
+        }
+        res.status(200).json(posts);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
-router.post("/add", (req, res) => {
-    const newPosts = new Posts({
-        author: req.body.author,
-        title: req.body.title,
-        extract: req.body.extract,
-        body: req.body.body
-    });
-
-    newPosts
-        .save()
-        .then(() => res.json("Artículo añadido"))
-        .catch(err => res.status(400).json(`Error: ${err}`));
+// TO CREATE NEW POST
+router.post("/", async (req, res) => {
+    const newPost = new Posts(req.body);
+    try {
+        const savedPost = await newPost.save();
+        res.status(200).json(savedPost);
+    } catch (err) {
+        res.status(500).json
+    }
 });
 
-// Find post by id
+// TO FIND POST BY ID
 router.get("/:id", (req, res) => {
     Posts.findById(req.params.id)
         .then(post => res.json(post))
         .catch(err => res.status(400).json(`Error: ${err}`));
 });
 
-// Find post by id and UPDATE
+// TO FIND POST BY ID AND UPDATE
 router.put("/:id", async (req, res) => {
     try {
         const post = await Posts.findById(req.params.id);
         if (post.username === req.body.username)
             try {
-                const updatedPost = await Post.findByIdAndUpdate(
+                const updatedPost = await Posts.findByIdAndUpdate(
                     req.params.id,
                     {
                         $set: req.body,
@@ -56,23 +62,22 @@ router.put("/:id", async (req, res) => {
     }
 });
 
-// Find post by id and DELETE
+// TO FIND POST BY ID AND DELETE
 router.delete('/:id', async (req, res) => {
-    if (req.body.userId === req.params.id) {
-        try {
-            const user = await User.findById(req.params.id);
+    try {
+        const post = await Posts.findById(req.params.id);
+        if (post.username === req.body.username) {
             try {
-                await Posts.deleteMany({ username: user.username });
-                await User.findByIdAndDelete(req.params.id);
-                res.status(200).json("Usuario eliminado");
+                await post.delete();
+                res.status(200).json("Artículo eliminado");
             } catch (err) {
                 res.status(500).json(err);
             }
-        } catch (err) {
-            res.status(404).json("Usuario no encontrado")
+        } else {
+            res.status(401).json("Solo puedes eliminar tu propio artículo.");
         }
-    } else {
-        res.status(401).json("Solo puedes eliminar tu cuenta.")
+    } catch (err) {
+        res.status(500).json(err);
     }
 })
 

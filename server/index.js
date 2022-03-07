@@ -4,6 +4,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const multer = require("multer");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -27,10 +28,23 @@ app.use("/birds", birds);
 app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/birdwatching", birdwatchingRoute);
-app.use("/posts", postRoute);
+app.use("/api/posts", postRoute);
 
 // Connection to DATABASE
 mongoose.connect(process.env.MONGO_URL);
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "server/images")
+    }, 
+    filename: (req, file, cb) => {
+        cb(null, req.body.name);
+    }
+});
+
+const upload = multer({storage:storage});
+app.post("/api/upload", upload.single("file"), (req,res) => {
+    res.status(200).json("El archivo se ha subido");
+})
 
 const db = mongoose.connection;
 db.on("error", error => console.log("Connection error", error));

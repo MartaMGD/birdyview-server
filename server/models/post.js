@@ -2,11 +2,6 @@ const mongoose = require("mongoose");
 
 const PostSchema = new mongoose.Schema(
     {
-        username:
-        {
-            type: String,
-            required: true
-        },
         title: 
         {
             type: String,
@@ -26,6 +21,11 @@ const PostSchema = new mongoose.Schema(
         {
             type: String,
             required: false
+        },
+        username:
+        {
+            type: String,
+            required: true
         }
     },
     {timestamps: true}
