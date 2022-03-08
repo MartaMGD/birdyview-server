@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const multer = require("multer");
+const path = require("path");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -29,6 +30,7 @@ app.use("/api/user", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/birdwatching", birdwatchingRoute);
 app.use("/api/posts", postRoute);
+app.use("/server/images", express.static(path.join(__dirname, "/server/images")));
 
 // Connection to DATABASE
 mongoose.connect(process.env.MONGO_URL);
@@ -42,7 +44,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({storage:storage});
-app.post("/api/upload", upload.single("file"), (req,res) => {
+app.post("/api/upload", upload.single("item"), (req,res) => {
     res.status(200).json("El archivo se ha subido");
 })
 
