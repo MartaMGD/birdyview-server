@@ -1,65 +1,84 @@
 const express = require("express");
 const router = express.Router();
-
-router.use(express.json());
 const Birdwatching = require("../models/birdwatchingmodel");
+router.use(express.json());
 
-// GET METHOD TO RECEIVE BIRDWATCHING INFO
-router.get("/", (req, res) => {
-    Birdwatching.find({}, (err, result) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.send(result)
-        }
-    });
-});
 
-// POST METHOD TO REGISTER WATCHED BIRD
-router.post("/", async (req, res) => {
-    const { userId, birdname, location, date, hour } = req.body;
-
-    const birdwatching = new Birdwatching({
-        userId: userId,
-        birdname: birdname,
-        location: location,
-        date: date,
-        hour: hour
-    });
-
-    await birdwatching.save();
-    res.send("Avistamiento añadido")
-});
-
-// PUT METHOD TO UPDATE WATCHED BIRD
-router.put("/", async (req, res) => {
-    const newName = req.body.newName
-    const newLocation = req.body.newLocation
-    const newDate = req.body.newDate
-    const newHour = req.body.newHour
-    const id = req.body.id;
-
+// TO GET ALL WATCHED BIRDS IN TABLE
+router.get("/", async (req, res) => {
+    const username = req.query.user;
     try {
-        await Birdwatching.findById(id, (error, birdToUpdate) => {
-            birdToUpdate.birdname = newName
-            birdToUpdate.location = newLocation
-            birdToUpdate.date = newDate
-            birdToUpdate.hour = newHour
-            birdToUpdate.save();
-        });
+        let birdwatching;
+        if (username) {
+            birdwatching = await Birdwatching.find({ username });
+        } else {
+            birdwatching = await Birdwatching.find();
+        }
+        res.status(200).json(birdwatching);
     } catch (err) {
-        console.log(err);
+        res.status(500).json(err);
     }
-
-    res.send("Actualizado")
 });
 
-//  DELETE METHOD
-router.delete("/delete/:id", (req, res) => {
-    const id = req.params.id;
-
-    Birdwatching.findByIdAndRemove(id).exec()
-    res.send("Avistamiento eliminado.")
+// TO REGISTER NEW BIRD IN TABLE
+router.post("/", async (req, res) => {
+    const newBird = new Birdwatching(req.body);
+    try {
+        const savedBird = await newBird.save();
+        res.status(200).json(savedBird);
+    } catch (err) {
+        res.status(500).json
+    }
 });
+
+// TO FIND BIRD BY ID
+router.get("/:id", (req, res) => {
+    Birdwatching.findById(req.params.id)
+        .then(birdwatching => res.json(birdwatching))
+        .catch(err => res.status(400).json(`Error: ${err}`));
+});
+
+// TO FIND BIRD IN TABLE BY ID AND UPDATE
+router.put("/:id", async (req, res) => {
+    try {
+        const birdwatching = await Birdwatching.findById(req.params.id);
+        if (birdwatching.username === req.body.username)
+            try {
+                const updatedBird = await Birdwatching.findByIdAndUpdate(
+                    req.params.id,
+                    {
+                        $set: req.body,
+                    },
+                    { new: true }
+                );
+                res.status(200).json(updatedBird)
+            } catch (err) {
+                res.status(500).json(err);
+            } else {
+            res.status(401).json("Solo puedes actualizar tu propio avistamiento");
+        }
+    } catch (err) {
+        res.status(500).json(err);
+    }
+});
+
+// TO FIND BIRD BY ID AND DELETE
+router.delete('/:id', async (req, res) => {
+    try {
+        const birdwatching = await Birdwatching.findById(req.params.id);
+        if (birdwatching.username === req.body.username) {
+            try {
+                await birdwatching.delete();
+                res.status(200).json("Avistamiento eliminado");
+            } catch (err) {
+                res.status(500).json(err);
+            }
+        } else {
+            res.status(401).json("Solo puedes eliminar tu propio avistamiento.");
+        }
+    } catch (err) {
+        res.status(500).json(err);
+    }
+})
 
 module.exports = router;

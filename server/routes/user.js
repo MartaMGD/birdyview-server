@@ -2,6 +2,7 @@ const router = require("express").Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/usermodel");
 const Post = require("../models/post");
+const Birdwatching = require("../models/birdwatchingmodel");
 
 
 // MODIFY/UPDATE USER
@@ -31,6 +32,7 @@ router.delete("/:id", async (req, res) => {
             const user = await User.findById(req.params.id);
             try {
                 await Post.deleteMany({username: user.username});
+                await Birdwatching.deleteMany({username: user.username});
                 await User.findByIdAndDelete(req.params.id);
                 res.status(200).json("Usuario eliminado");
             } catch (err) {

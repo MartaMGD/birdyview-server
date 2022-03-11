@@ -2,17 +2,12 @@ const mongoose = require("mongoose");
 
 const birdwatchingSchema = new mongoose.Schema(
     {
-        userId:
-        {
-            type: String,
-            required: false
-        },
-        birdname: 
+        birdname:
         {
             type: String,
             required: true
         },
-        location: 
+        location:
         {
             type: String,
             required: true
@@ -22,11 +17,16 @@ const birdwatchingSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        hour: 
+        hour:
         {
             type: String,
             required: true
         },
+        username:
+        {
+            type: String,
+            required: true
+        }
     }
 )
 
